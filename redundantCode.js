@@ -4,6 +4,7 @@ function drawShape() {
     let y = shape3D.vertice[shape3D.face[i][0]].y
     let z = shape3D.vertice[shape3D.face[i][0]].z
 
+    // block 1
     const xyHyp = Math.sqrt(x ** 2 + y ** 2)
     const xyAngle = Math.atan2(y, x) + shape3D.xySkew
     x = xyHyp * Math.cos(xyAngle)
@@ -16,6 +17,7 @@ function drawShape() {
     const zxAngle = Math.atan2(x, z) + shape3D.zxSkew
     z = zxHyp * Math.cos(zxAngle)
     x = zxHyp * Math.sin(zxAngle)
+    //^
 
     ctx.beginPath()
     ctx.moveTo(shape3D.x + x, shape3D.y + y)
@@ -24,6 +26,7 @@ function drawShape() {
       let y = shape3D.vertice[shape3D.face[i][j]].y
       let z = shape3D.vertice[shape3D.face[i][j]].z
 
+      // block 2
       const xyHyp = Math.sqrt(x ** 2 + y ** 2)
       const xyAngle = Math.atan2(y, x) + shape3D.xySkew
       x = xyHyp * Math.cos(xyAngle)
@@ -36,6 +39,7 @@ function drawShape() {
       const zxAngle = Math.atan2(x, z) + shape3D.zxSkew
       z = zxHyp * Math.cos(zxAngle)
       x = zxHyp * Math.sin(zxAngle)
+      //^
 
       ctx.lineTo(shape3D.x + x, shape3D.y + y)
     }
