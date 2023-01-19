@@ -1,0 +1,155 @@
+<style>
+  body {
+    margin: 0;
+    background-color: #D9D9D9;
+  }
+</style>
+<canvas></canvas>
+<script>
+const canvas = document.querySelector('canvas')
+const ctx = canvas.getContext('2d')
+canvas.width = innerWidth
+canvas.height = innerHeight
+
+let wKey = false
+let aKey = false
+let sKey = false
+let dKey = false
+let qKey = false
+let eKey = false
+addEventListener("keydown", (event) => {
+  if (event.code == 'KeyW') wKey = true
+  if (event.code == 'KeyA') aKey = true
+  if (event.code == 'KeyS') sKey = true
+  if (event.code == 'KeyD') dKey = true
+  if (event.code == 'KeyQ') qKey = true
+  if (event.code == 'KeyE') eKey = true
+})
+addEventListener("keyup", (event) => {
+  if (event.code == 'KeyW') wKey = false
+  if (event.code == 'KeyA') aKey = false
+  if (event.code == 'KeyS') sKey = false
+  if (event.code == 'KeyD') dKey = false
+  if (event.code == 'KeyQ') qKey = false
+  if (event.code == 'KeyE') eKey = false
+})
+
+let shape3D = {
+  x: innerWidth / 2,
+  y: innerHeight / 2,
+  z: 0,
+  xySkew: 0,
+  yzSkew: 0,
+  zxSkew: 0,
+  vertice: [
+    { x: 200, y:-200, z:-200 },// 0
+    { x:-200, y:-200, z:-200 },// 1
+    { x:-200, y:-200, z: 200 },// 2
+    { x: 200, y:-200, z: 200 },// 3
+    { x: 200, y: 200, z:-200 },// 4
+    { x:-200, y: 200, z:-200 },// 5
+    { x:-200, y: 200, z: 200 },// 6
+    { x: 200, y: 200, z: 200 },// 7
+  ],
+  face: [
+    [0, 1, 2, 3],// face 0
+    [0, 1, 5, 4],// face 1
+    [1, 2, 6, 5],// face 2
+    [2, 3, 7, 6],// face 3
+    [3, 0, 4, 7],// face 4
+    [4, 5, 6, 7],// face 5
+  ],
+}
+
+// Animation frames
+
+animate()
+
+function animate() {
+  canvas.width = innerWidth
+  canvas.height = innerHeight
+  ctx.miterLimit = 1
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  registerKeys()
+  drawGrid()
+  drawShape()
+  requestAnimationFrame(animate)
+}
+
+function drawGrid() {
+  let gridSize = 40
+  ctx.lineWidth = 1
+  ctx.strokeStyle = 'darkgrey'
+  ctx.beginPath()
+  for (let i = 0; i <= canvas.width; i += gridSize) {
+    ctx.moveTo(i, 0)
+    ctx.lineTo(i, canvas.height)
+  }
+  for (let i = 0; i <= canvas.height; i += gridSize) {
+    ctx.moveTo(0, i)
+    ctx.lineTo(canvas.width, i)
+  }
+  ctx.stroke()
+}
+
+// 3D Model
+
+function drawShape() {
+  for (let i = 0; i < shape3D.face.length; i++) {
+    let x = shape3D.vertice[shape3D.face[i][0]].x
+    let y = shape3D.vertice[shape3D.face[i][0]].y
+    let z = shape3D.vertice[shape3D.face[i][0]].z
+
+    const xyHyp = Math.sqrt(x ** 2 + y ** 2)
+    const xyAngle = Math.atan2(y, x) + shape3D.xySkew
+    x = xyHyp * Math.cos(xyAngle)
+    y = xyHyp * Math.sin(xyAngle)
+    const yzHyp = Math.sqrt(y ** 2 + z ** 2)
+    const yzAngle = Math.atan2(z, y) + shape3D.yzSkew
+    y = yzHyp * Math.cos(yzAngle)
+    z = yzHyp * Math.sin(yzAngle)
+    const zxHyp = Math.sqrt(z ** 2 + x ** 2)
+    const zxAngle = Math.atan2(x, z) + shape3D.zxSkew
+    z = zxHyp * Math.cos(zxAngle)
+    x = zxHyp * Math.sin(zxAngle)
+
+    ctx.beginPath()
+    ctx.moveTo(shape3D.x + x, shape3D.y + y)
+    for (let j = 1; j < shape3D.face[i].length; j++){
+      let x = shape3D.vertice[shape3D.face[i][j]].x
+      let y = shape3D.vertice[shape3D.face[i][j]].y
+      let z = shape3D.vertice[shape3D.face[i][j]].z
+
+      const xyHyp = Math.sqrt(x ** 2 + y ** 2)
+      const xyAngle = Math.atan2(y, x) + shape3D.xySkew
+      x = xyHyp * Math.cos(xyAngle)
+      y = xyHyp * Math.sin(xyAngle)
+      const yzHyp = Math.sqrt(y ** 2 + z ** 2)
+      const yzAngle = Math.atan2(z, y) + shape3D.yzSkew
+      y = yzHyp * Math.cos(yzAngle)
+      z = yzHyp * Math.sin(yzAngle)
+      const zxHyp = Math.sqrt(z ** 2 + x ** 2)
+      const zxAngle = Math.atan2(x, z) + shape3D.zxSkew
+      z = zxHyp * Math.cos(zxAngle)
+      x = zxHyp * Math.sin(zxAngle)
+
+      ctx.lineTo(shape3D.x + x, shape3D.y + y)
+    }
+    ctx.closePath()
+    ctx.strokeStyle = 'blue'
+    ctx.lineWidth = 4
+    ctx.stroke()
+  }
+}
+
+// Utilities
+
+function registerKeys() {
+  if (aKey == true) shape3D.zxSkew -= 0.01
+  if (dKey == true) shape3D.zxSkew += 0.01
+  if (wKey == true) shape3D.yzSkew += 0.01
+  if (sKey == true) shape3D.yzSkew -= 0.01
+  if (qKey == true) shape3D.xySkew -= 0.01
+  if (eKey == true) shape3D.xySkew += 0.01
+}
+</script>
