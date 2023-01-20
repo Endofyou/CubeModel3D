@@ -112,6 +112,9 @@ function drawShape() {
     const zxAngle = Math.atan2(x, z) + shape3D.zxSkew
     z = zxHyp * Math.cos(zxAngle)
     x = zxHyp * Math.sin(zxAngle)
+    
+    x = (innerWidth / 2) * (x / (shape3D.z - z))
+    y = (innerWidth / 2) * (y / (shape3D.z - z))
 
     ctx.beginPath()
     ctx.moveTo(shape3D.x + x, shape3D.y + y)
@@ -132,6 +135,9 @@ function drawShape() {
       const zxAngle = Math.atan2(x, z) + shape3D.zxSkew
       z = zxHyp * Math.cos(zxAngle)
       x = zxHyp * Math.sin(zxAngle)
+      
+      x = (innerWidth / 2) * (x / (shape3D.z - z))
+      y = (innerWidth / 2) * (y / (shape3D.z - z))
 
       ctx.lineTo(shape3D.x + x, shape3D.y + y)
     }
