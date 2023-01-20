@@ -80,7 +80,7 @@ function animate() {
   shape3D.y = innerHeight / 2
   registerKeys()
   drawGrid()
-  drawShape()
+  drawShape3D()
   staticText('Move perspective: UP and DOWN arrows', 10, 30, 30, 4.5)
   staticText('XY Rotation: Q and E keys', 10, 70, 30, 4.5)
   staticText('YZ Rotation: W and S keys', 10, 110, 30, 4.5)
@@ -106,7 +106,7 @@ function drawGrid() {
 
 // 3D Model
 
-function drawShape() {
+function drawShape3D() {
   for (let i = 0; i < shape3D.face.length; i++) {
     [x, y] = rotateAxes(i, 0)
     ctx.beginPath()
