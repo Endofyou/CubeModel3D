@@ -76,9 +76,15 @@ function animate() {
   canvas.height = innerHeight
   ctx.miterLimit = 1
   ctx.clearRect(0, 0, canvas.width, canvas.height)
+  shape3D.x = innerWidth / 2
+  shape3D.y = innerHeight / 2
   registerKeys()
   drawGrid()
   drawShape()
+  staticText('Move perspective: UP and DOWN arrows', 10, 30, 30, 4.5)
+  staticText('XY Movement: Q and E keys', 10, 70, 30, 4.5)
+  staticText('YZ Movement: W and S keys', 10, 110, 30, 4.5)
+  staticText('ZX Movement: A and D keys', 10, 150, 30, 4.5)
   requestAnimationFrame(animate)
 }
 
@@ -165,5 +171,14 @@ function registerKeys() {
   if (eKey == true) shape3D.xySkew += 0.01
   if (upArrow == true) shape3D.z -= 5
   if (downArrow == true) shape3D.z += 5
+}
+
+function staticText(text, x, y, size, lineWidth) {
+  ctx.font = size + 'px consolas';
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = lineWidth;
+  ctx.strokeText(text, x, y);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(text, x, y);
 }
 </script>
