@@ -19,7 +19,6 @@ let qKey = false
 let eKey = false
 let upArrow = false
 let downArrow = false
-
 addEventListener("keydown", (event) => {
   if (event.code == 'KeyW') wKey = true
   if (event.code == 'KeyA') aKey = true
@@ -30,7 +29,6 @@ addEventListener("keydown", (event) => {
   if (event.code == 'ArrowUp') upArrow = true
   if (event.code == 'ArrowDown') downArrow = true
 })
-  
 addEventListener("keyup", (event) => {
   if (event.code == 'KeyW') wKey = false
   if (event.code == 'KeyA') aKey = false
@@ -83,10 +81,10 @@ function animate() {
   registerKeys()
   drawGrid()
   drawShape3D()
-  staticText('Move perspective: UP and DOWN arrows', 10, 30, 30, 5)
-  staticText('XY Rotation: Q and E keys', 10, 70, 30, 5)
-  staticText('YZ Rotation: W and S keys', 10, 110, 30, 5)
-  staticText('ZX Rotation: A and D keys', 10, 150, 30, 5)
+  staticText('Move perspective: UP and DOWN arrows', 10, 30, 30, 4.5)
+  staticText('XY Rotation: Q and E keys', 10, 70, 30, 4.5)
+  staticText('YZ Rotation: W and S keys', 10, 110, 30, 4.5)
+  staticText('ZX Rotation: A and D keys', 10, 150, 30, 4.5)
   requestAnimationFrame(animate)
 }
 
@@ -109,24 +107,12 @@ function drawGrid() {
 // 3D Model
 
 function drawShape3D() {
-  let faceZ = []
   for (let i = 0; i < shape3D.face.length; i++) {
-    let sum = 0;
-    for (let j = 0; j < shape3D.face[i].length; j++) {
-      sum += shape3D.vertice[shape3D.face[i][j]].z
-    }
-    faceZ[i] = sum
-  }
-  
-  let order = [0, 1, 2, 3, 4, 5]
-  order.sort(function(a, b) {return faceZ[a] - faceZ[b]})
-
-  for (let i = 0; i < shape3D.face.length; i++) {
-    [x, y] = rotateAxes(order[i], 0)
+    [x, y] = rotateAxes(i, 0)
     ctx.beginPath()
     ctx.moveTo(shape3D.x + x, shape3D.y + y)
     for (let j = 1; j < shape3D.face[i].length; j++){
-      [x, y] = rotateAxes(order[i], j)
+      [x, y] = rotateAxes(i, j)
       ctx.lineTo(shape3D.x + x, shape3D.y + y)
     }
     ctx.closePath()
