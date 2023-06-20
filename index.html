@@ -151,7 +151,7 @@ function drawShape3D() {
     ctx.fillStyle = hslToHex(
       shape3D.color[order[i]][0],
       shape3D.color[order[i]][1],
-      shape3D.color[order[i]][2] * 1.11 * (1 - 0.75 * ((yShader / 4 + 200) / 400)) ** 0.4,
+      shape3D.color[order[i]][2] * 1.11 * (1 - 0.8 * ((yShader / 4 + 200) / 400)) ** 0.4,
     )
     ctx.fill()
   }
