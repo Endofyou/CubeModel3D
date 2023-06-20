@@ -19,6 +19,7 @@ let qKey = false
 let eKey = false
 let upArrow = false
 let downArrow = false
+
 addEventListener("keydown", (event) => {
   if (event.code == 'KeyW') wKey = true
   if (event.code == 'KeyA') aKey = true
@@ -29,6 +30,7 @@ addEventListener("keydown", (event) => {
   if (event.code == 'ArrowUp') upArrow = true
   if (event.code == 'ArrowDown') downArrow = true
 })
+
 addEventListener("keyup", (event) => {
   if (event.code == 'KeyW') wKey = false
   if (event.code == 'KeyA') aKey = false
@@ -65,6 +67,14 @@ let shape3D = {
     [3, 0, 4, 7],// face 4
     [4, 5, 6, 7],// face 5
   ],
+  color: [
+    [0, 100, 36],
+    [21, 100, 50],
+    [50, 100, 50],
+    [148, 100, 30],
+    [216, 100, 34],
+    [0, 0, 90],
+  ]
 }
 
 // Animation frames
@@ -78,18 +88,18 @@ function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   shape3D.x = innerWidth / 2
   shape3D.y = innerHeight / 2
+  
   registerKeys()
   drawGrid()
+  updateAxes()
   drawShape3D()
-  staticText('Move perspective: UP and DOWN arrows', 10, 30, 30, 4.5)
-  staticText('XY Rotation: Q and E keys', 10, 70, 30, 4.5)
-  staticText('YZ Rotation: W and S keys', 10, 110, 30, 4.5)
-  staticText('ZX Rotation: A and D keys', 10, 150, 30, 4.5)
+  drawText()
+  
   requestAnimationFrame(animate)
 }
 
 function drawGrid() {
-  let gridSize = 40
+  const gridSize = 40
   ctx.lineWidth = 1
   ctx.strokeStyle = 'darkgrey'
   ctx.beginPath()
@@ -104,35 +114,66 @@ function drawGrid() {
   ctx.stroke()
 }
 
+function drawText() {
+  staticText('Move perspective: UP and DOWN arrows', 10, 30, 30, 5)
+  staticText('XY Rotation: Q and E keys', 10, 70, 30, 5)
+  staticText('YZ Rotation: W and S keys', 10, 110, 30, 5)
+  staticText('ZX Rotation: A and D keys', 10, 150, 30, 5)
+}
+
 // 3D Model
 
 function drawShape3D() {
+  let faceZ = []
   for (let i = 0; i < shape3D.face.length; i++) {
-    [x, y] = rotateAxes(i, 0)
+    let sum = 0;
+    for (let j = 0; j < shape3D.face[i].length; j++) {
+      sum += shape3D.vertice[shape3D.face[i][j]].z
+    }
+    faceZ[i] = sum
+  }
+  
+  let order = [0, 1, 2, 3, 4, 5]
+  order.sort(function(a, b) {return faceZ[a] - faceZ[b]})
+
+  for (let i = 0; i < shape3D.face.length; i++) {
+    [x, y] = rotateAxes(order[i], 0)
+    let yShader = shape3D.vertice[shape3D.face[order[i]][0]].y
     ctx.beginPath()
     ctx.moveTo(shape3D.x + x, shape3D.y + y)
-    for (let j = 1; j < shape3D.face[i].length; j++){
-      [x, y] = rotateAxes(i, j)
+    for (let j = 1; j < shape3D.face[order[i]].length; j++) {
+      [x, y] = rotateAxes(order[i], j)
       ctx.lineTo(shape3D.x + x, shape3D.y + y)
+      yShader += shape3D.vertice[shape3D.face[order[i]][j]].y
     }
     ctx.closePath()
-    ctx.strokeStyle = 'blue'
-    ctx.lineWidth = 4000 / shape3D.z
-    ctx.stroke()
+    
+    ctx.fillStyle = hslToHex(
+      shape3D.color[order[i]][0],
+      shape3D.color[order[i]][1],
+      shape3D.color[order[i]][2] * 1.11 * (1 - 0.75 * ((yShader / 4 + 200) / 400)) ** 0.4,
+    )
+    ctx.fill()
   }
 }
 
 // Utilities
 
 function registerKeys() {
-  if (aKey == true) shape3D.zxSkew -= 0.01
-  if (dKey == true) shape3D.zxSkew += 0.01
-  if (wKey == true) shape3D.yzSkew += 0.01
-  if (sKey == true) shape3D.yzSkew -= 0.01
-  if (qKey == true) shape3D.xySkew -= 0.01
-  if (eKey == true) shape3D.xySkew += 0.01
-  if (upArrow == true) shape3D.z -= 5
-  if (downArrow == true) shape3D.z += 5
+  if (upArrow == true) shape3D.z -= 7
+  if (downArrow == true) shape3D.z += 7
+
+  if (aKey == true && dKey == false) {shape3D.zxSkew = -0.02; }
+  else if (dKey == true && aKey == false) {shape3D.zxSkew = 0.02; }
+  else shape3D.zxSkew = 0
+
+  if (wKey == true && sKey == false) {shape3D.yzSkew = 0.02; }
+  else if (sKey == true && wKey == false) {shape3D.yzSkew = -0.02; }
+  else shape3D.yzSkew = 0
+
+  if (qKey == true && eKey == false) {shape3D.xySkew = -0.02; }
+  else if (eKey == true && qKey == false) {shape3D.xySkew = 0.02; }
+  else shape3D.xySkew = 0
 }
 
 function staticText(text, x, y, size, lineWidth) {
@@ -144,27 +185,61 @@ function staticText(text, x, y, size, lineWidth) {
   ctx.fillText(text, x, y);
 }
 
+function updateAxes() {
+  for (let i = 0; i < shape3D.vertice.length; i++) {
+    let x = shape3D.vertice[i].x
+    let y = shape3D.vertice[i].y
+    let z = shape3D.vertice[i].z
+  
+    const xyHyp = Math.sqrt(x ** 2 + y ** 2)
+    const xyAngle = Math.atan2(y, x) + shape3D.xySkew
+    x = xyHyp * Math.cos(xyAngle)
+    y = xyHyp * Math.sin(xyAngle)
+  
+    const yzHyp = Math.sqrt(y ** 2 + z ** 2)
+    const yzAngle = Math.atan2(z, y) + shape3D.yzSkew
+    y = yzHyp * Math.cos(yzAngle)
+    z = yzHyp * Math.sin(yzAngle)
+  
+    const zxHyp = Math.sqrt(z ** 2 + x ** 2)
+    const zxAngle = Math.atan2(x, z) + shape3D.zxSkew
+    z = zxHyp * Math.cos(zxAngle)
+    x = zxHyp * Math.sin(zxAngle)
+  
+    shape3D.vertice[i].x = x
+    shape3D.vertice[i].y = y
+    shape3D.vertice[i].z = z
+  }
+}
+
 function rotateAxes(i, j) {
   let x = shape3D.vertice[shape3D.face[i][j]].x
   let y = shape3D.vertice[shape3D.face[i][j]].y
   let z = shape3D.vertice[shape3D.face[i][j]].z
-
-  const xyHyp = Math.sqrt(x ** 2 + y ** 2)
-  const xyAngle = Math.atan2(y, x) + shape3D.xySkew
-  x = xyHyp * Math.cos(xyAngle)
-  y = xyHyp * Math.sin(xyAngle)
-  const yzHyp = Math.sqrt(y ** 2 + z ** 2)
-  const yzAngle = Math.atan2(z, y) + shape3D.yzSkew
-  y = yzHyp * Math.cos(yzAngle)
-  z = yzHyp * Math.sin(yzAngle)
-  const zxHyp = Math.sqrt(z ** 2 + x ** 2)
-  const zxAngle = Math.atan2(x, z) + shape3D.zxSkew
-  z = zxHyp * Math.cos(zxAngle)
-  x = zxHyp * Math.sin(zxAngle)
-
+  
   x = (innerWidth / 2) * (x / (shape3D.z - z))
   y = (innerWidth / 2) * (y / (shape3D.z - z))
-
+  
   return [x, y]
+}
+
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100
+  let c = (1 - Math.abs(2 * l - 1)) * s,
+    x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+    m = l - c / 2, r = 0, g = 0, b = 0
+  if (0 <= h && h < 60) { r = c; g = x; b = 0 }
+  else if (60 <= h && h < 120) { r = x; g = c; b = 0 }
+  else if (120 <= h && h < 180) { r = 0; g = c; b = x }
+  else if (180 <= h && h < 240) { r = 0; g = x; b = c }
+  else if (240 <= h && h < 300) { r = x; g = 0; b = c }
+  else if (300 <= h && h < 360) { r = c; g = 0; b = x }
+  r = Math.round((r + m) * 255).toString(16)
+  g = Math.round((g + m) * 255).toString(16)
+  b = Math.round((b + m) * 255).toString(16)
+  if (r.length == 1) r = "0" + r
+  if (g.length == 1) g = "0" + g
+  if (b.length == 1) b = "0" + b
+  return "#" + r + g + b
 }
 </script>
